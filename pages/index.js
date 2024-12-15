@@ -6,7 +6,6 @@ const VideoPlayer = () => {
   const [loopCount, setLoopCount] = useState(1);
   const [countDownTime, setCountdownTime] = useState(new Date());
   const [transitionTime, setTransitionTime] = useState(2.2);
-  const [isVideoPlaying, setIsVideoPlaying] = useState(true);
   const videoPlayerRef = useRef(null);
   const currentLoopRef = useRef(loopCount);
   const router = useRouter();
@@ -33,22 +32,8 @@ const VideoPlayer = () => {
     if (!videoUrl) return;
 
     loadYouTubeAPI();
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        setIsVideoPlaying(false);
-      } else {
-        if (videoPlayerRef.current) {
-          videoPlayerRef.current.playVideo();
-        }
-        setIsVideoPlaying(true);
-      }
-    };
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
+    // Removed the visibility change logic
   }, [videoUrl]);
 
   const loadYouTubeAPI = () => {
@@ -123,7 +108,7 @@ const VideoPlayer = () => {
 
   return (
     <div style={{ background: "black", height: "100vh", width: "100vw" }}>
-      {isVideoPlaying && videoUrl ? (
+      {videoUrl ? (
         <div className="fullscreenVideo">
           <div
             id="youtube-player"
@@ -138,7 +123,7 @@ const VideoPlayer = () => {
         </div>
       ) : (
         <div style={{ color: "white", textAlign: "center", fontSize: "30px" }}>
-          Video Finished or Paused
+          Video Loading...
         </div>
       )}
     </div>
