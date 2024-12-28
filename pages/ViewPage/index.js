@@ -10,7 +10,8 @@ const ViewPage = () => {
         const response = await fetch("/api/get-page");
         if (response.ok) {
           const data = await response.json();
-          setSections(data);
+          setSections(data.sections);
+          console.log("DAta", data);
         } else {
           console.error("Failed to fetch page data.");
         }

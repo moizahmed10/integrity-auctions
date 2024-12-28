@@ -56,9 +56,19 @@ function ResponsiveDrawer({ children, window }) {
 
   const menuItems = [
     {
-      text: "Configure Page Content",
+      text: "Configure Page 1",
       icon: <EditNoteIcon />,
       route: "/create-page",
+    },
+    {
+      text: "Configure Page 2",
+      icon: <EditNoteIcon />,
+      route: "/create-page2",
+    },
+    {
+      text: "Configure Page 3",
+      icon: <EditNoteIcon />,
+      route: "/create-page3",
     },
     {
       text: "Configure Transition & Countdown Time",

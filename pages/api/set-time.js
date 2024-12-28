@@ -1,9 +1,27 @@
-import fs from "fs";
-import path from "path";
+import { initializeApp } from "firebase/app";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  arrayUnion,
+} from "firebase/firestore";
 
-export default function handler(req, res) {
-  const filePath = path.join(process.cwd(), "public", "timeSettings.json");
+const firebaseConfig = {
+  apiKey: "AIzaSyBHGoIX0TS8a6Qb4KI_YKoj3SZnWqWTzGE",
+  authDomain: "ila-app-4d690.firebaseapp.com",
+  projectId: "ila-app-4d690",
+  storageBucket: "ila-app-4d690.firebasestorage.app",
+  messagingSenderId: "50766624696",
+  appId: "1:50766624696:web:909674224a610affa1414d",
+  measurementId: "G-CEZV16PP6H",
+};
 
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+export default async function handler(req, res) {
   if (req.method === "POST") {
     const { countdownTime, transitionTime, videoUrl, loopCount } = req.body;
 
@@ -31,12 +49,9 @@ export default function handler(req, res) {
         loopCount: Number(loopCount),
       };
 
-      // Write the data to the file
-      if (!fs.existsSync(filePath)) {
-        fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
-      } else {
-        fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
-      }
+      // Write the data to Firestore
+      const docRef = doc(db, "configurations", "RcIV3y8edFx7oxuRwI6P"); // "settings" collection, "timeSettings" document
+      await setDoc(docRef, data);
 
       return res.status(200).json({ message: "Settings saved successfully!" });
     } catch (error) {

@@ -3,7 +3,6 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
-  "/videoplayer": "pages/videoplayer.js",
-  "/api/fetch-time": "pages/api/fetch-time.js",
-  "/api/get-page": "pages/api/get-page.js"
+  "/create-page": "pages/create-page.js",
+  "/api/fetch-time": "pages/api/fetch-time.js"
 }

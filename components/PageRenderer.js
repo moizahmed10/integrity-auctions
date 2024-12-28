@@ -13,6 +13,7 @@ const PageRenderer = ({ sections }) => (
         <h1 style={{ fontSize: section.headingFontSize || 24, color: "black" }}>
           {section.heading}
         </h1>
+        {console.log("sections", section)}
         <p
           style={{
             fontSize: section.descriptionFontSize || 16,

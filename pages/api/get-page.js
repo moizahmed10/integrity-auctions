@@ -1,15 +1,33 @@
-import fs from "fs";
-import path from "path";
+import { initializeApp } from "firebase/app";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 
-export default function handler(req, res) {
-  const filePath = path.join(process.cwd(), "public", "pageData.json");
+// Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyBHGoIX0TS8a6Qb4KI_YKoj3SZnWqWTzGE",
+  authDomain: "ila-app-4d690.firebaseapp.com",
+  projectId: "ila-app-4d690",
+  storageBucket: "ila-app-4d690.firebasestorage.app",
+  messagingSenderId: "50766624696",
+  appId: "1:50766624696:web:909674224a610affa1414d",
+  measurementId: "G-CEZV16PP6H",
+};
 
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+export default async function handler(req, res) {
   if (req.method === "GET") {
     try {
-      const data = fs.readFileSync(filePath, "utf-8");
-      res.status(200).json(JSON.parse(data));
+      const docRef = doc(db, "pages", "4SY9mIAu4jtEFcFgHPHe");
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        res.status(200).json(docSnap.data());
+      } else {
+        res.status(404).json({ error: "Document not found" });
+      }
     } catch (error) {
-      console.error("Error reading JSON file:", error);
+      console.error("Error reading Firestore document:", error);
       res.status(500).json({ error: "Failed to read data" });
     }
   } else {

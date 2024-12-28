@@ -1,96 +1,106 @@
-// pages/TransitionPage.js
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import gsap from "gsap";
 import CountdownTimer from "./CountDown/index";
 import ViewPage from "./ViewPage";
+import ViewPage2 from "./ViewPage2";
+import ViewPage3 from "./ViewPage3";
+
 import styles from "./TransitionPage.module.css";
 
 const TransitionPage = () => {
-  const [transitionTime, setTransitionTime] = useState(2.2);
-  const [currentPage, setCurrentPage] = useState("view-form");
+  const [transitionTime, setTransitionTime] = useState(1);
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [countDownTime, setCountdownTime] = useState(new Date());
+  const [displayPages, setDisplayPages] = useState([]);
+  const transitionRef = useRef(null);
 
   useEffect(() => {
-    const fetchTransitionTime = async () => {
+    // Fetch transition time and page display settings
+    const fetchSettings = async () => {
       try {
-        const response = await fetch("/api/fetch-time");
-        const data = await response.json();
-        setTransitionTime(parseInt(data.transitionTime, 10));
-        setCountdownTime(data.countdownTime);
+        const [timeResponse, pageResponse] = await Promise.all([
+          fetch("/api/fetch-time"),
+          fetch("/api/getpageStatus"),
+        ]);
+
+        const timeData = await timeResponse.json();
+        const pageData = await pageResponse.json();
+
+        setCountdownTime(timeData.countdownTime);
+        setDisplayPages(
+          [
+            { id: "view-form", show: pageData.display1 },
+            { id: "view-form-2", show: pageData.display2 },
+            { id: "view-form-3", show: pageData.display3 },
+            { id: "countdown", show: true }, // Always show countdown page
+          ].filter((page) => page.show)
+        ); // Filter pages based on display flag
       } catch (error) {
-        console.error("Error fetching transition time:", error);
+        console.error("Error fetching settings:", error);
       }
     };
 
-    fetchTransitionTime();
+    fetchSettings();
   }, []);
 
   useEffect(() => {
-    const animationDuration = 2.2;
-    const tltransition = gsap
-      .timeline({ paused: true })
-      .set(`.${styles.viewFormContainer}, .${styles.countdownPageContainer}`, {
-        opacity: 0,
-      }) // Initially hide both pages
-      .fromTo(
-        `.${styles.pageTransitionRed}`,
-        animationDuration,
-        { scaleX: 0 },
-        { scaleX: 1, transformOrigin: "left", ease: "power4.inOut" }
-      )
-      .fromTo(
-        `.${styles.pageTransitionBlack}`,
-        animationDuration,
-        { scaleX: 0 },
-        { scaleX: 1, transformOrigin: "left", ease: "power4.inOut" },
-        "-=0.2"
-      )
-      .set(`.${styles.pageTransitionRed}`, { scaleX: 0 })
-      .to(`.${styles.pageTransitionBlack}`, animationDuration, {
-        scaleX: 0,
-        transformOrigin: "right",
-        ease: "power4.inOut",
+    // Transition animation setup
+    if (displayPages.length === 0) return;
+
+    const tl = gsap.timeline({
+      paused: true,
+      defaults: { duration: 1 },
+    });
+
+    tl.to(transitionRef.current, { opacity: 0 })
+      .set(transitionRef.current, {
+        onComplete: () => {
+          const nextIndex = (currentPageIndex + 1) % displayPages.length;
+          setCurrentPageIndex(nextIndex);
+        },
       })
-      .set(`.${styles.viewFormContainer}, .${styles.countdownPageContainer}`, {
-        opacity: 1,
-      });
+      .to(transitionRef.current, { opacity: 1 }, "+=0.2");
 
     const intervalId = setInterval(
       () => {
-        tltransition.restart();
-        setCurrentPage((prevPage) =>
-          prevPage === "view-form" ? "countdown" : "view-form"
-        );
+        tl.restart();
       },
       (transitionTime + 4) * 1000
     );
 
     return () => clearInterval(intervalId);
-  }, [transitionTime]);
+  }, [currentPageIndex, displayPages, transitionTime]);
 
   return (
     <div style={{ background: "#737373" }}>
-      {/* View Page */}
-      <div
-        className={styles.viewFormContainer}
-        style={{ display: currentPage === "view-form" ? "block" : "none" }}
-      >
-        {currentPage === "view-form" && <ViewPage />}
-      </div>
-
-      {/* Countdown Timer */}
-      <div
-        className={styles.countdownPageContainer}
-        style={{ display: currentPage === "countdown" ? "block" : "none" }}
-      >
-        {currentPage === "countdown" && (
-          <CountdownTimer EventCountdownTime={countDownTime} />
+      {/* Page Container */}
+      <div ref={transitionRef} className={styles.transitionContainer}>
+        {/* Render pages dynamically based on current page */}
+        {displayPages.length > 0 && (
+          <>
+            {displayPages[currentPageIndex]?.id === "view-form" && (
+              <div className={styles.viewFormContainer}>
+                <ViewPage />
+              </div>
+            )}
+            {displayPages[currentPageIndex]?.id === "view-form-2" && (
+              <div className={styles.viewFormContainer}>
+                <ViewPage2 />
+              </div>
+            )}
+            {displayPages[currentPageIndex]?.id === "view-form-3" && (
+              <div className={styles.viewFormContainer}>
+                <ViewPage3 />
+              </div>
+            )}
+            {displayPages[currentPageIndex]?.id === "countdown" && (
+              <div className={styles.countdownPageContainer}>
+                <CountdownTimer EventCountdownTime={countDownTime} />
+              </div>
+            )}
+          </>
         )}
       </div>
-
-      {/* Transition Effects */}
-      <div className={styles.pageTransitionRed}></div>
-      <div className={styles.pageTransitionBlack}></div>
     </div>
   );
 };

@@ -10,6 +10,7 @@ import FormControl from "@mui/material/FormControl";
 import FormLabel from "@mui/material/FormLabel";
 
 import Slider from "@mui/material/Slider"; // Import for font size slider
+import Checkbox from "@mui/material/Checkbox"; // Import Checkbox component
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 
 const FormBuilder = ({ onSave, loading }) => {
@@ -21,6 +22,7 @@ const FormBuilder = ({ onSave, loading }) => {
     descriptionFontSize: 16,
   });
   const [action, setAction] = useState("overwrite");
+  const [displayPage, setDisplayPage] = useState(true); // State for display page checkbox
 
   const handleAddSection = () => {
     setSections([...sections, input]);
@@ -33,7 +35,7 @@ const FormBuilder = ({ onSave, loading }) => {
   };
 
   const handleSave = () => {
-    onSave(sections, action);
+    onSave(sections, action, displayPage);
   };
 
   const lightTheme = createTheme({
@@ -81,6 +83,17 @@ const FormBuilder = ({ onSave, loading }) => {
           }}
         >
           <p>Configure the content of the main page:</p>
+
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={displayPage}
+                onChange={(e) => setDisplayPage(e.target.checked)}
+                color="primary"
+              />
+            }
+            label="Display Page"
+          />
 
           <TextField
             id="outlined-basic"

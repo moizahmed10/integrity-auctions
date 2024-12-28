@@ -1,17 +1,40 @@
-import fs from "fs";
-import path from "path";
+import { initializeApp } from "firebase/app";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  arrayUnion,
+} from "firebase/firestore";
 
-export default function handler(req, res) {
-  const filePath = path.join(process.cwd(), "public", "timeSettings.json");
+const firebaseConfig = {
+  apiKey: "AIzaSyBHGoIX0TS8a6Qb4KI_YKoj3SZnWqWTzGE",
+  authDomain: "ila-app-4d690.firebaseapp.com",
+  projectId: "ila-app-4d690",
+  storageBucket: "ila-app-4d690.firebasestorage.app",
+  messagingSenderId: "50766624696",
+  appId: "1:50766624696:web:909674224a610affa1414d",
+  measurementId: "G-CEZV16PP6H",
+};
 
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+export default async function handler(req, res) {
   if (req.method === "GET") {
     try {
-      if (!fs.existsSync(filePath)) {
+      // Reference to the Firestore document
+      const docRef = doc(db, "configurations", "RcIV3y8edFx7oxuRwI6P"); // "settings" collection, "timeSettings" document
+      const docSnap = await getDoc(docRef);
+
+      // Check if the document exists
+      if (!docSnap.exists()) {
         return res.status(404).json({ message: "Time settings not found." });
       }
 
-      const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
-      return res.status(200).json(data);
+      // Send the data from Firestore
+      return res.status(200).json(docSnap.data());
     } catch (error) {
       console.error("Error fetching time settings:", error);
       return res

@@ -25,10 +25,10 @@ self.__BUILD_MANIFEST = {
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/videoplayer": [
+    "/create-page": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/videoplayer.js"
+      "static/chunks/pages/create-page.js"
     ]
   },
   "ampFirstPages": []

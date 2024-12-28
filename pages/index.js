@@ -6,6 +6,7 @@ const VideoPlayer = () => {
   const [loopCount, setLoopCount] = useState(1);
   const [countDownTime, setCountdownTime] = useState(new Date());
   const [transitionTime, setTransitionTime] = useState(2.2);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(true);
   const videoPlayerRef = useRef(null);
   const currentLoopRef = useRef(loopCount);
   const router = useRouter();
@@ -32,8 +33,22 @@ const VideoPlayer = () => {
     if (!videoUrl) return;
 
     loadYouTubeAPI();
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        setIsVideoPlaying(false);
+      } else {
+        if (videoPlayerRef.current) {
+          videoPlayerRef.current.playVideo();
+        }
+        setIsVideoPlaying(true);
+      }
+    };
 
-    // Removed the visibility change logic
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, [videoUrl]);
 
   const loadYouTubeAPI = () => {
@@ -70,7 +85,7 @@ const VideoPlayer = () => {
         },
         playerVars: {
           autoplay: 1,
-          mute: 1,
+          mute: 0,
           loop: 1,
           modestbranding: 1,
           controls: 0,
@@ -87,9 +102,7 @@ const VideoPlayer = () => {
         event.target.seekTo(0);
         event.target.playVideo();
       } else {
-        setTimeout(() => {
-          router.push("/videoplayer");
-        }, 1000); // Wait a second after the video finishes
+        router.push("/videoplayer");
       }
     }
   };
@@ -108,7 +121,7 @@ const VideoPlayer = () => {
 
   return (
     <div style={{ background: "black", height: "100vh", width: "100vw" }}>
-      {videoUrl ? (
+      {isVideoPlaying && videoUrl ? (
         <div className="fullscreenVideo">
           <div
             id="youtube-player"
@@ -123,7 +136,7 @@ const VideoPlayer = () => {
         </div>
       ) : (
         <div style={{ color: "white", textAlign: "center", fontSize: "30px" }}>
-          Video Loading...
+          Video Finished or Paused
         </div>
       )}
     </div>

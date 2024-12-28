@@ -1,49 +1,155 @@
-import { useRef, useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/router";
 
-const VideoLooper = ({ videoSrc, loopLimit, onLoopsCompleted }) => {
-  const videoRef = useRef(null);
-  const [loopCount, setLoopCount] = useState(0);
+const VideoPlayer = () => {
+  const [videoUrl, setVideoUrl] = useState("");
+  const [loopCount, setLoopCount] = useState(1);
+  const [countDownTime, setCountdownTime] = useState(new Date());
+  const [transitionTime, setTransitionTime] = useState(2.2);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(true);
+  const videoPlayerRef = useRef(null);
+  const currentLoopRef = useRef(loopCount);
+  const router = useRouter();
 
-  const handleVideoEnd = () => {
-    setLoopCount((prevCount) => {
-      const newCount = prevCount + 1;
-      if (newCount >= loopLimit) {
-        // Trigger the action when loop limit is reached
-        onLoopsCompleted();
+  // Fetch video settings from API
+  useEffect(() => {
+    const fetchTimeSettings = async () => {
+      try {
+        const response = await fetch("/api/fetch-time");
+        const data = await response.json();
+        setTransitionTime(parseInt(data.transitionTime, 10));
+        setCountdownTime(data.countdownTime);
+        setVideoUrl(data.videoUrl);
+        setLoopCount(parseInt(data.loopCount, 10));
+        currentLoopRef.current = parseInt(data.loopCount, 10);
+      } catch (error) {
+        console.error("Error fetching time settings:", error);
       }
-      return newCount;
-    });
+    };
+
+    fetchTimeSettings();
+  }, []);
+
+  // Initialize YouTube Player
+  useEffect(() => {
+    if (!videoUrl) return;
+
+    loadYouTubeAPI();
+
+    // Listen for tab focus events
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // When tab is not active, stop video (optional)
+        setIsVideoPlaying(false);
+      } else {
+        // When tab comes back into focus, play video
+        if (videoPlayerRef.current) {
+          videoPlayerRef.current.playVideo();
+        }
+        setIsVideoPlaying(true);
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [videoUrl]);
+
+  const loadYouTubeAPI = () => {
+    if (!window.YT) {
+      const tag = document.createElement("script");
+      tag.src = "https://www.youtube.com/iframe_api";
+      document.body.appendChild(tag);
+
+      window.onYouTubeIframeAPIReady = initializePlayer;
+    } else {
+      initializePlayer();
+    }
+  };
+
+  const initializePlayer = () => {
+    if (!window.YT || !window.YT.Player) {
+      console.error("YouTube API is not ready");
+      return;
+    }
+
+    const videoId = extractVideoId(videoUrl);
+    if (!videoId) {
+      console.error("Invalid YouTube video URL", videoUrl);
+      return;
+    }
+
+    if (!videoPlayerRef.current) {
+      videoPlayerRef.current = new window.YT.Player("youtube-player", {
+        videoId: videoId,
+        events: {
+          onReady: (event) => {
+            event.target.playVideo();
+          },
+          onStateChange: handleVideoStateChange,
+        },
+        playerVars: {
+          autoplay: 1,
+          mute: 0,
+          loop: 1,
+          modestbranding: 1,
+          controls: 0,
+          rel: 0,
+        },
+      });
+    }
+  };
+
+  const handleVideoStateChange = (event) => {
+    if (event.data === window.YT.PlayerState.ENDED) {
+      if (currentLoopRef.current > 1) {
+        currentLoopRef.current -= 1;
+        event.target.seekTo(0);
+        event.target.playVideo();
+      } else {
+        setTimeout(() => {
+          router.push("/");
+        }, 1000); // Wait a second after the video finishes
+      }
+    }
+  };
+
+  const extractVideoId = (url) => {
+    const regex =
+      /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/?[\w-]{11}|(?:.*[?&]v=)|(?:\/.*\/)([\w-]{11}))(?![^&])|youtu\.be\/([\w-]{11}))/;
+    const match = url.match(regex);
+    if (match && (match[1] || match[2])) {
+      return match[1] || match[2];
+    } else {
+      console.error("Failed to extract video ID from URL:", url);
+      return null;
+    }
   };
 
   return (
-    <div>
-      <video
-        ref={videoRef}
-        src={videoSrc}
-        autoPlay
-        loop={false} // Disable automatic looping to handle it manually
-        onEnded={handleVideoEnd}
-        style={{ width: "100%", maxHeight: "500px" }}
-      />
-      <p>Loop Count: {loopCount}</p>
+    <div style={{ background: "black", height: "100vh", width: "100vw" }}>
+      {isVideoPlaying && videoUrl ? (
+        <div className="fullscreenVideo">
+          <div
+            id="youtube-player"
+            style={{
+              width: "100%",
+              height: "100%",
+              position: "absolute",
+              top: 0,
+              left: 0,
+            }}
+          ></div>
+        </div>
+      ) : (
+        <div style={{ color: "white", textAlign: "center", fontSize: "30px" }}>
+          Video Finished or Paused
+        </div>
+      )}
     </div>
   );
 };
 
-export default function App() {
-  const handleLoopsCompleted = () => {
-    alert("The video has looped the specified number of times!");
-    // Perform any other action here
-  };
-
-  return (
-    <div>
-      <h1>Video Looper</h1>
-      <VideoLooper
-        videoSrc="your-video-file.mp4"
-        loopLimit={3} // Trigger action after 3 loops
-        onLoopsCompleted={handleLoopsCompleted}
-      />
-    </div>
-  );
-}
+export default VideoPlayer;

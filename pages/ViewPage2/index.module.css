@@ -1,0 +1,14 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: white;
+  background-image: url("/transparent logo.png");
+  background-position: top-left;
+  background-size: 500px;
+  background-repeat: no-repeat;
+  width: 100vw;
+  height: 100vh;
+  color: white;
+}

@@ -14,7 +14,7 @@ const CreatePage = () => {
     severity: "success", // success | error
   });
 
-  const handleSave = async (sections, action) => {
+  const handleSave = async (sections, action, displayPage) => {
     console.log("Checking sections", sections, action);
     try {
       setLoading(true);
@@ -23,7 +23,11 @@ const CreatePage = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ sections: sections, action: action }),
+        body: JSON.stringify({
+          sections: sections,
+          action: action,
+          displayPage: displayPage,
+        }),
       });
 
       if (response.ok) {
