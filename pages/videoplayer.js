@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import gsap from "gsap";
 import CountdownTimer from "./CountDown/index";
 import ViewPage from "./ViewPage";
@@ -13,6 +14,7 @@ const TransitionPage = () => {
   const [countDownTime, setCountdownTime] = useState(new Date());
   const [displayPages, setDisplayPages] = useState([]);
   const transitionRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Fetch transition time and page display settings
@@ -44,7 +46,6 @@ const TransitionPage = () => {
   }, []);
 
   useEffect(() => {
-    // Transition animation setup
     if (displayPages.length === 0) return;
 
     const tl = gsap.timeline({
@@ -55,27 +56,26 @@ const TransitionPage = () => {
     tl.to(transitionRef.current, { opacity: 0 })
       .set(transitionRef.current, {
         onComplete: () => {
-          const nextIndex = (currentPageIndex + 1) % displayPages.length;
-          setCurrentPageIndex(nextIndex);
+          const nextIndex = currentPageIndex + 1;
+          if (nextIndex >= displayPages.length) {
+            navigate("/");
+          } else {
+            setCurrentPageIndex(nextIndex);
+          }
         },
       })
       .to(transitionRef.current, { opacity: 1 }, "+=0.2");
 
-    const intervalId = setInterval(
-      () => {
-        tl.restart();
-      },
-      (transitionTime + 4) * 1000
-    );
+    const intervalId = setInterval(() => {
+      tl.restart();
+    }, (transitionTime + 4) * 1000);
 
     return () => clearInterval(intervalId);
-  }, [currentPageIndex, displayPages, transitionTime]);
+  }, [currentPageIndex, displayPages, transitionTime, navigate]);
 
   return (
     <div style={{ background: "#737373" }}>
-      {/* Page Container */}
       <div ref={transitionRef} className={styles.transitionContainer}>
-        {/* Render pages dynamically based on current page */}
         {displayPages.length > 0 && (
           <>
             {displayPages[currentPageIndex]?.id === "view-form" && (
