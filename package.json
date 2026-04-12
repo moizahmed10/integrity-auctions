@@ -20,6 +20,7 @@
     "next": "^15.0.4",
     "react": "latest",
     "react-dom": "latest",
+    "react-youtube": "^10.1.0",
     "sass": "^1.82.0",
     "sweetalert2": "^11.14.5"
   }
