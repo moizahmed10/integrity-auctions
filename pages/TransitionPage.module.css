@@ -1,0 +1,36 @@
+/* TransitionPage.module.css */
+
+.pageTransitionRed {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #812d20;
+  transform: scaleX(0);
+}
+
+.pageTransitionBlack {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: black;
+  transform: scaleX(0);
+}
+
+.transitionContainer {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.viewFormContainer {
+  opacity: 1;
+}
+
+.countdownPageContainer {
+  opacity: 1;
+}
