@@ -1,144 +1,115 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/router";
+import YouTube from "react-youtube";
+
+const extractVideoId = (url) => {
+  const regex =
+    /(?:youtube\.com\/(?:watch\?.*v=|embed\/|v\/|shorts\/)|youtu\.be\/)([\w-]{11})/;
+  const match = url.match(regex);
+  return match ? match[1] : null;
+};
 
 const VideoPlayer = () => {
-  const [videoUrl, setVideoUrl] = useState("");
-  const [loopCount, setLoopCount] = useState(1);
-  const [countDownTime, setCountdownTime] = useState(new Date());
-  const [transitionTime, setTransitionTime] = useState(2.2);
-  const [isVideoPlaying, setIsVideoPlaying] = useState(true);
-  const videoPlayerRef = useRef(null);
-  const currentLoopRef = useRef(loopCount);
+  const [videoId, setVideoId] = useState(null);
+  const playerRef = useRef(null);
+  const currentLoopRef = useRef(1);
   const router = useRouter();
 
   useEffect(() => {
-    const fetchTimeSettings = async () => {
-      try {
-        const response = await fetch("/api/fetch-time");
-        const data = await response.json();
-        setTransitionTime(parseInt(data.transitionTime, 10));
-        setCountdownTime(data.countdownTime);
-        setVideoUrl(data.videoUrl);
-        setLoopCount(parseInt(data.loopCount, 10));
-        currentLoopRef.current = parseInt(data.loopCount, 10);
-      } catch (error) {
-        console.error("Error fetching time settings:", error);
-      }
-    };
-
-    fetchTimeSettings();
+    fetch("/api/fetch-time")
+      .then((r) => r.json())
+      .then((data) => {
+        const id = extractVideoId(data.videoUrl);
+        const loops = parseInt(data.loopCount, 10) || 1;
+        setVideoId(id);
+        currentLoopRef.current = loops;
+      })
+      .catch((err) => console.error("Error fetching config:", err));
   }, []);
 
+  // Resume playback when tab regains focus
   useEffect(() => {
-    if (!videoUrl) return;
-
-    loadYouTubeAPI();
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        setIsVideoPlaying(false);
-      } else {
-        if (videoPlayerRef.current) {
-          videoPlayerRef.current.playVideo();
-        }
-        setIsVideoPlaying(true);
+    const handleVisibility = () => {
+      if (!document.hidden && playerRef.current) {
+        try {
+          playerRef.current.playVideo();
+        } catch {}
       }
     };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibility);
+  }, []);
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
+  const onReady = (event) => {
+    playerRef.current = event.target;
+    event.target.mute();
+    event.target.playVideo();
+  };
 
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, [videoUrl]);
-
-  const loadYouTubeAPI = () => {
-    if (!window.YT) {
-      const tag = document.createElement("script");
-      tag.src = "https://www.youtube.com/iframe_api";
-      document.body.appendChild(tag);
-      window.onYouTubeIframeAPIReady = initializePlayer;
+  const onEnd = () => {
+    if (currentLoopRef.current > 1) {
+      currentLoopRef.current -= 1;
+      playerRef.current?.seekTo(0, true);
+      playerRef.current?.playVideo();
     } else {
-      initializePlayer();
+      router.push("/videoplayer");
     }
   };
 
-  const initializePlayer = () => {
-    if (!window.YT || !window.YT.Player) {
-      console.error("YouTube API is not ready");
-      return;
-    }
-
-    const videoId = extractVideoId(videoUrl);
-    if (!videoId) {
-      console.error("Invalid YouTube video URL", videoUrl);
-      return;
-    }
-
-    if (!videoPlayerRef.current) {
-      videoPlayerRef.current = new window.YT.Player("youtube-player", {
-        videoId: videoId,
-        events: {
-          onReady: (event) => {
-            event.target.playVideo();
-          },
-          onStateChange: handleVideoStateChange,
-        },
-        playerVars: {
-          autoplay: 1,
-          mute: 0,
-          loop: 1,
-          modestbranding: 1,
-          controls: 0,
-          rel: 0,
-        },
-      });
-    }
+  const onError = (event) => {
+    console.error("YouTube Player Error:", event.data);
   };
 
-  const handleVideoStateChange = (event) => {
-    if (event.data === window.YT.PlayerState.ENDED) {
-      if (currentLoopRef.current > 1) {
-        currentLoopRef.current -= 1;
-        event.target.seekTo(0);
-        event.target.playVideo();
-      } else {
-        router.push("/videoplayer");
-      }
-    }
-  };
-
-  const extractVideoId = (url) => {
-    const regex =
-      /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/?[\w-]{11}|(?:.*[?&]v=)|(?:\/.*\/)([\w-]{11}))(?![^&])|youtu\.be\/([\w-]{11}))/;
-    const match = url.match(regex);
-    if (match && (match[1] || match[2])) {
-      return match[1] || match[2];
-    } else {
-      console.error("Failed to extract video ID from URL:", url);
-      return null;
-    }
+  const opts = {
+    width: "100%",
+    height: "100%",
+    playerVars: {
+      autoplay: 1,
+      mute: 1,
+      controls: 0,
+      modestbranding: 1,
+      rel: 0,
+      playsinline: 1,
+    },
   };
 
   return (
     <div style={{ background: "black", height: "100vh", width: "100vw" }}>
-      {isVideoPlaying && videoUrl ? (
-        <div className="fullscreenVideo">
-          <div
-            id="youtube-player"
-            style={{
-              width: "100%",
-              height: "100%",
-              position: "absolute",
-              top: 0,
-              left: 0,
-            }}
-          ></div>
-        </div>
+      {videoId ? (
+        <YouTube
+          videoId={videoId}
+          opts={opts}
+          onReady={onReady}
+          onEnd={onEnd}
+          onError={onError}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+          }}
+          iframeClassName="yt-iframe-full"
+        />
       ) : (
-        <div style={{ color: "white", textAlign: "center", fontSize: "30px" }}>
-          Video Finished or Paused
+        <div
+          style={{
+            color: "white",
+            textAlign: "center",
+            fontSize: "30px",
+            paddingTop: "45vh",
+          }}
+        >
+          Loading Video...
         </div>
       )}
+      <style jsx global>{`
+        .yt-iframe-full {
+          width: 100% !important;
+          height: 100% !important;
+        }
+      `}</style>
     </div>
   );
 };

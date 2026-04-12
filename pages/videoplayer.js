@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/router";
 import gsap from "gsap";
 import CountdownTimer from "./CountDown/index";
 import ViewPage from "./ViewPage";
@@ -14,7 +14,7 @@ const TransitionPage = () => {
   const [countDownTime, setCountdownTime] = useState(new Date());
   const [displayPages, setDisplayPages] = useState([]);
   const transitionRef = useRef(null);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   useEffect(() => {
     // Fetch transition time and page display settings
@@ -35,7 +35,7 @@ const TransitionPage = () => {
             { id: "view-form-2", show: pageData.display2 },
             { id: "view-form-3", show: pageData.display3 },
             { id: "countdown", show: true }, // Always show countdown page
-          ].filter((page) => page.show)
+          ].filter((page) => page.show),
         ); // Filter pages based on display flag
       } catch (error) {
         console.error("Error fetching settings:", error);
@@ -58,7 +58,7 @@ const TransitionPage = () => {
         onComplete: () => {
           const nextIndex = currentPageIndex + 1;
           if (nextIndex >= displayPages.length) {
-            navigate("/");
+            router.push("/");
           } else {
             setCurrentPageIndex(nextIndex);
           }
@@ -66,12 +66,15 @@ const TransitionPage = () => {
       })
       .to(transitionRef.current, { opacity: 1 }, "+=0.2");
 
-    const intervalId = setInterval(() => {
-      tl.restart();
-    }, (transitionTime + 4) * 1000);
+    const intervalId = setInterval(
+      () => {
+        tl.restart();
+      },
+      (transitionTime + 4) * 1000,
+    );
 
     return () => clearInterval(intervalId);
-  }, [currentPageIndex, displayPages, transitionTime, navigate]);
+  }, [currentPageIndex, displayPages, transitionTime, router]);
 
   return (
     <div style={{ background: "#737373" }}>
