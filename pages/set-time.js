@@ -6,7 +6,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { Button, TextField, Snackbar, Alert, AlertTitle } from "@mui/material";
+import { Button, TextField, Snackbar, Alert, AlertTitle, Skeleton } from "@mui/material";
 import LoadingButton from "@mui/lab/LoadingButton";
 
 const SetTime = () => {
@@ -14,6 +14,7 @@ const SetTime = () => {
   const [transitionTime, setTransitionTime] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
   const [loopCount, setLoopCount] = useState("");
+  const [dataLoaded, setDataLoaded] = useState(false);
 
   useEffect(() => {
     fetch("/api/fetch-time")
@@ -23,8 +24,9 @@ const SetTime = () => {
         if (data.transitionTime != null) setTransitionTime(String(data.transitionTime));
         if (data.videoUrl) setVideoUrl(data.videoUrl);
         if (data.loopCount != null) setLoopCount(String(data.loopCount));
+        setDataLoaded(true);
       })
-      .catch(() => {});
+      .catch(() => setDataLoaded(true));
   }, []);
 
   const [error, setError] = useState({
@@ -174,68 +176,80 @@ const SetTime = () => {
               Time
             </h1>
 
-            <DateTimePicker
-              label="Countdown Date and Time"
-              value={countdownTime}
-              onChange={(value) => {
-                setCountdownTime(value);
-              }}
-              renderInput={(props) => (
-                <TextField
-                  {...props}
-                  error={error.countdownTime}
-                  helperText={countdownTimeErrorMessage}
+            {!dataLoaded ? (
+              <>
+                <Skeleton variant="rounded" height={56} sx={{ mb: "25px" }} />
+                <Skeleton variant="rounded" height={56} sx={{ mb: "25px" }} />
+                <Skeleton variant="rounded" height={56} sx={{ mb: "25px" }} />
+                <Skeleton variant="rounded" height={56} sx={{ mb: "25px" }} />
+                <Skeleton variant="rounded" height={42} />
+              </>
+            ) : (
+              <>
+                <DateTimePicker
+                  label="Countdown Date and Time"
+                  value={countdownTime}
+                  onChange={(value) => {
+                    setCountdownTime(value);
+                  }}
+                  renderInput={(props) => (
+                    <TextField
+                      {...props}
+                      error={error.countdownTime}
+                      helperText={countdownTimeErrorMessage}
+                    />
+                  )}
                 />
-              )}
-            />
 
-            <TextField
-              sx={{ margin: "25px 0px" }}
-              label="Transition Time (in seconds)"
-              InputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
-              type="number"
-              value={transitionTime}
-              onChange={(e) => setTransitionTime(e.target.value)}
-              error={error.transitionTime}
-              helperText={
-                transitionTimeErrorMessage ||
-                (error.transitionTime && "This field is required")
-              }
-            />
+                <TextField
+                  sx={{ margin: "25px 0px" }}
+                  label="Transition Time (in seconds)"
+                  InputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+                  type="number"
+                  value={transitionTime}
+                  onChange={(e) => setTransitionTime(e.target.value)}
+                  error={error.transitionTime}
+                  helperText={
+                    transitionTimeErrorMessage ||
+                    (error.transitionTime && "This field is required")
+                  }
+                />
 
-            <TextField
-              sx={{ margin: "25px 0px" }}
-              label="Video URL"
-              type="url"
-              value={videoUrl}
-              onChange={(e) => setVideoUrl(e.target.value)}
-              error={error.videoUrl}
-              helperText={videoUrlErrorMessage}
-            />
+                <TextField
+                  sx={{ margin: "25px 0px" }}
+                  label="Video URL"
+                  type="url"
+                  value={videoUrl}
+                  onChange={(e) => setVideoUrl(e.target.value)}
+                  error={error.videoUrl}
+                  helperText={videoUrlErrorMessage}
+                />
 
-            <TextField
-              sx={{ margin: "25px 0px" }}
-              label="Loop Count"
-              InputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
-              type="number"
-              value={loopCount}
-              onChange={(e) => setLoopCount(e.target.value)}
-              error={error.loopCount}
-              helperText={loopCountErrorMessage}
-            />
+                <TextField
+                  sx={{ margin: "25px 0px" }}
+                  label="Loop Count"
+                  InputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+                  type="number"
+                  value={loopCount}
+                  onChange={(e) => setLoopCount(e.target.value)}
+                  error={error.loopCount}
+                  helperText={loopCountErrorMessage}
+                />
 
-            <LoadingButton
-              onClick={handleSave}
-              variant="contained"
-              disabled={
-                transitionTime.length === 0 ||
-                videoUrl.length === 0 ||
-                loopCount.length === 0
-              }
-              loading={loading}
-            >
-              Save Time Settings
-            </LoadingButton>
+                <LoadingButton
+                  onClick={handleSave}
+                  variant="contained"
+                  disabled={
+                    transitionTime.length === 0 ||
+                    videoUrl.length === 0 ||
+                    loopCount.length === 0
+                  }
+                  loading={loading}
+                >
+                  Save Time Settings
+                </LoadingButton>
+              </>
+            )}
           </div>
         </LocalizationProvider>
 

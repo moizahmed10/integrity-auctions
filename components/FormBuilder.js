@@ -9,8 +9,9 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
 import FormLabel from "@mui/material/FormLabel";
 
-import Slider from "@mui/material/Slider"; // Import for font size slider
-import Checkbox from "@mui/material/Checkbox"; // Import Checkbox component
+import Slider from "@mui/material/Slider";
+import Checkbox from "@mui/material/Checkbox";
+import Skeleton from "@mui/material/Skeleton";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 
 const FormBuilder = ({ onSave, loading, initialData }) => {
@@ -89,95 +90,113 @@ const FormBuilder = ({ onSave, loading, initialData }) => {
             flexDirection: "column",
           }}
         >
-          <p>Configure the content of the main page:</p>
+          {initialData === null ? (
+            <>
+              <Skeleton variant="text" width={260} height={28} sx={{ mb: "16px" }} />
+              <Skeleton variant="rounded" height={24} width={140} sx={{ mb: "20px" }} />
+              <Skeleton variant="rounded" height={56} sx={{ mb: "20px" }} />
+              <Skeleton variant="rounded" height={56} sx={{ mb: "20px" }} />
+              <Skeleton variant="text" width={140} height={20} />
+              <Skeleton variant="rounded" height={36} sx={{ mb: "8px" }} />
+              <Skeleton variant="text" width={160} height={20} />
+              <Skeleton variant="rounded" height={36} sx={{ mb: "20px" }} />
+              <Skeleton variant="rounded" height={42} sx={{ mb: "20px" }} />
+              <Skeleton variant="rounded" height={80} sx={{ mb: "20px" }} />
+              <Skeleton variant="rounded" height={42} />
+            </>
+          ) : (
+            <>
+              <p>Configure the content of the main page:</p>
 
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={displayPage}
-                onChange={(e) => setDisplayPage(e.target.checked)}
-                color="primary"
-              />
-            }
-            label="Display Page"
-          />
-
-          <TextField
-            id="outlined-basic"
-            label="Heading"
-            autoComplete="off"
-            variant="outlined"
-            value={input.heading}
-            sx={{ color: "black", marginTop: "20px" }}
-            onChange={(e) => setInput({ ...input, heading: e.target.value })}
-          />
-          <TextField
-            id="outlined-basic"
-            label="Description"
-            autoComplete="off"
-            variant="outlined"
-            sx={{ margin: "20px 0px" }}
-            value={input.description}
-            onChange={(e) =>
-              setInput({ ...input, description: e.target.value })
-            }
-          />
-          <p>Heading Font Size:</p>
-          <Slider
-            value={input.headingFontSize}
-            min={10}
-            max={60}
-            step={1}
-            onChange={(e, newValue) =>
-              setInput({ ...input, headingFontSize: newValue })
-            }
-            valueLabelDisplay="auto"
-          />
-          <p>Description Font Size:</p>
-          <Slider
-            value={input.descriptionFontSize}
-            min={10}
-            max={50}
-            step={1}
-            onChange={(e, newValue) =>
-              setInput({ ...input, descriptionFontSize: newValue })
-            }
-            valueLabelDisplay="auto"
-          />
-          <Button variant="contained" onClick={handleAddSection}>
-            Add Section
-          </Button>
-          <FormControl sx={{ margin: "20px 0px" }}>
-            <FormLabel id="demo-controlled-radio-buttons-group">
-              Action Type
-            </FormLabel>
-            <RadioGroup
-              aria-labelledby="demo-controlled-radio-buttons-group"
-              name="controlled-radio-buttons-group"
-              value={action}
-              onChange={handleChange}
-            >
               <FormControlLabel
-                value="overwrite"
-                control={<Radio />}
-                label="Overwrite the contents of the existing page"
+                control={
+                  <Checkbox
+                    checked={displayPage}
+                    onChange={(e) => setDisplayPage(e.target.checked)}
+                    color="primary"
+                  />
+                }
+                label="Display Page"
               />
-              <FormControlLabel
-                value="append"
-                control={<Radio />}
-                label="Append content to the existing file"
-              />
-            </RadioGroup>
-          </FormControl>
 
-          <LoadingButton
-            variant="contained"
-            onClick={handleSave}
-            disabled={sections.length === 0}
-            loading={loading}
-          >
-            Update Page
-          </LoadingButton>
+              <TextField
+                id="outlined-basic"
+                label="Heading"
+                autoComplete="off"
+                variant="outlined"
+                value={input.heading}
+                sx={{ color: "black", marginTop: "20px" }}
+                onChange={(e) => setInput({ ...input, heading: e.target.value })}
+              />
+              <TextField
+                id="outlined-basic"
+                label="Description"
+                autoComplete="off"
+                variant="outlined"
+                sx={{ margin: "20px 0px" }}
+                value={input.description}
+                onChange={(e) =>
+                  setInput({ ...input, description: e.target.value })
+                }
+              />
+              <p>Heading Font Size:</p>
+              <Slider
+                value={input.headingFontSize}
+                min={10}
+                max={60}
+                step={1}
+                onChange={(e, newValue) =>
+                  setInput({ ...input, headingFontSize: newValue })
+                }
+                valueLabelDisplay="auto"
+              />
+              <p>Description Font Size:</p>
+              <Slider
+                value={input.descriptionFontSize}
+                min={10}
+                max={50}
+                step={1}
+                onChange={(e, newValue) =>
+                  setInput({ ...input, descriptionFontSize: newValue })
+                }
+                valueLabelDisplay="auto"
+              />
+              <Button variant="contained" onClick={handleAddSection}>
+                Add Section
+              </Button>
+              <FormControl sx={{ margin: "20px 0px" }}>
+                <FormLabel id="demo-controlled-radio-buttons-group">
+                  Action Type
+                </FormLabel>
+                <RadioGroup
+                  aria-labelledby="demo-controlled-radio-buttons-group"
+                  name="controlled-radio-buttons-group"
+                  value={action}
+                  onChange={handleChange}
+                >
+                  <FormControlLabel
+                    value="overwrite"
+                    control={<Radio />}
+                    label="Overwrite the contents of the existing page"
+                  />
+                  <FormControlLabel
+                    value="append"
+                    control={<Radio />}
+                    label="Append content to the existing file"
+                  />
+                </RadioGroup>
+              </FormControl>
+
+              <LoadingButton
+                variant="contained"
+                onClick={handleSave}
+                disabled={sections.length === 0}
+                loading={loading}
+              >
+                Update Page
+              </LoadingButton>
+            </>
+          )}
         </div>
         {sections.length !== 0 && (
           <div
