@@ -16,6 +16,7 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 
 const FormBuilder = ({ onSave, loading, initialData }) => {
   const [sections, setSections] = useState([]);
+  const [existingCount, setExistingCount] = useState(0);
   const [input, setInput] = useState({
     heading: "",
     description: "",
@@ -27,6 +28,10 @@ const FormBuilder = ({ onSave, loading, initialData }) => {
 
   useEffect(() => {
     if (initialData) {
+      if (Array.isArray(initialData.sections)) {
+        setSections(initialData.sections);
+        setExistingCount(initialData.sections.length);
+      }
       if (typeof initialData.displayPage === "boolean") setDisplayPage(initialData.displayPage);
     }
   }, [initialData]);
@@ -42,7 +47,10 @@ const FormBuilder = ({ onSave, loading, initialData }) => {
   };
 
   const handleSave = () => {
-    onSave(sections, action, displayPage);
+    // overwrite: send all sections (replaces everything in the sheet)
+    // append: send only newly added sections (API appends them to existing)
+    const sectionsToSave = action === "append" ? sections.slice(existingCount) : sections;
+    onSave(sectionsToSave, action, displayPage);
   };
 
   const lightTheme = createTheme({
