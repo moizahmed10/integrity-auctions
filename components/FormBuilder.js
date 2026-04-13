@@ -33,10 +33,10 @@ const FormBuilder = ({ onSave, loading, initialData }) => {
     }
   }, [initialData]);
 
-  // What the preview shows depends on the action:
-  // overwrite → only the new sections the user is building
-  // append → existing + new so you can see the full result
-  const previewSections = action === "overwrite"
+  // Preview always starts showing existing content.
+  // overwrite + sections added → preview replaces existing with only new sections
+  // append → preview always shows existing + new
+  const previewSections = action === "overwrite" && newSections.length > 0
     ? newSections
     : [...existingSections, ...newSections];
 
@@ -207,7 +207,7 @@ const FormBuilder = ({ onSave, loading, initialData }) => {
             </>
           )}
         </div>
-        {newSections.length !== 0 && (
+        {previewSections.length !== 0 && (
           <div
             style={{
               backgroundColor: "white",
