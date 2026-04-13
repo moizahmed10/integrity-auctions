@@ -15,8 +15,8 @@ import Skeleton from "@mui/material/Skeleton";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 
 const FormBuilder = ({ onSave, loading, initialData }) => {
-  const [sections, setSections] = useState([]);
-  const [existingCount, setExistingCount] = useState(0);
+  const [existingSections, setExistingSections] = useState([]);
+  const [newSections, setNewSections] = useState([]);
   const [input, setInput] = useState({
     heading: "",
     description: "",
@@ -28,16 +28,20 @@ const FormBuilder = ({ onSave, loading, initialData }) => {
 
   useEffect(() => {
     if (initialData) {
-      if (Array.isArray(initialData.sections)) {
-        setSections(initialData.sections);
-        setExistingCount(initialData.sections.length);
-      }
+      if (Array.isArray(initialData.sections)) setExistingSections(initialData.sections);
       if (typeof initialData.displayPage === "boolean") setDisplayPage(initialData.displayPage);
     }
   }, [initialData]);
 
+  // What the preview shows depends on the action:
+  // overwrite → only the new sections the user is building
+  // append → existing + new so you can see the full result
+  const previewSections = action === "overwrite"
+    ? newSections
+    : [...existingSections, ...newSections];
+
   const handleAddSection = () => {
-    setSections([...sections, input]);
+    setNewSections([...newSections, input]);
     setInput({
       heading: "",
       description: "",
@@ -47,10 +51,8 @@ const FormBuilder = ({ onSave, loading, initialData }) => {
   };
 
   const handleSave = () => {
-    // overwrite: send all sections (replaces everything in the sheet)
-    // append: send only newly added sections (API appends them to existing)
-    const sectionsToSave = action === "append" ? sections.slice(existingCount) : sections;
-    onSave(sectionsToSave, action, displayPage);
+    // both modes only send newSections — overwrite replaces, append adds
+    onSave(newSections, action, displayPage);
   };
 
   const lightTheme = createTheme({
@@ -197,7 +199,7 @@ const FormBuilder = ({ onSave, loading, initialData }) => {
               <LoadingButton
                 variant="contained"
                 onClick={handleSave}
-                disabled={sections.length === 0}
+                disabled={newSections.length === 0}
                 loading={loading}
               >
                 Update Page
@@ -205,7 +207,7 @@ const FormBuilder = ({ onSave, loading, initialData }) => {
             </>
           )}
         </div>
-        {sections.length !== 0 && (
+        {newSections.length !== 0 && (
           <div
             style={{
               backgroundColor: "white",
@@ -221,7 +223,7 @@ const FormBuilder = ({ onSave, loading, initialData }) => {
           >
             <p>Preview:</p>
             <ul>
-              {sections.map((section, index) => (
+              {previewSections.map((section, index) => (
                 <li key={index}>
                   <h3 style={{ fontSize: section.headingFontSize }}>
                     {section.heading}
