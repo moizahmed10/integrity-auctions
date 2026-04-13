@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "../components/Header";
 import dayjs from "dayjs";
 
@@ -14,6 +14,18 @@ const SetTime = () => {
   const [transitionTime, setTransitionTime] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
   const [loopCount, setLoopCount] = useState("");
+
+  useEffect(() => {
+    fetch("/api/fetch-time")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.countdownTime) setCountdownTime(dayjs(data.countdownTime));
+        if (data.transitionTime != null) setTransitionTime(String(data.transitionTime));
+        if (data.videoUrl) setVideoUrl(data.videoUrl);
+        if (data.loopCount != null) setLoopCount(String(data.loopCount));
+      })
+      .catch(() => {});
+  }, []);
 
   const [error, setError] = useState({
     countdownTime: false,

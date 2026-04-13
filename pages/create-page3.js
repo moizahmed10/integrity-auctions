@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import FormBuilder from "../components/FormBuilder";
 import { useRouter } from "next/router";
 import Header from "../components/Header";
@@ -7,6 +7,14 @@ import { Snackbar, Alert, AlertTitle } from "@mui/material";
 const CreatePage = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [initialData, setInitialData] = useState(null);
+
+  useEffect(() => {
+    fetch("/api/get-page3")
+      .then((res) => res.json())
+      .then((data) => setInitialData(data))
+      .catch(() => {});
+  }, []);
   // State for Snackbar Alert
   const [alert, setAlert] = useState({
     open: false,
@@ -62,7 +70,7 @@ const CreatePage = () => {
   return (
     <Header>
       <div>
-        <FormBuilder onSave={handleSave} loading={loading} />
+        <FormBuilder onSave={handleSave} loading={loading} initialData={initialData} />
       </div>
 
       {/* Snackbar Alert for Success or Error */}

@@ -1,25 +1,4 @@
-import { initializeApp } from "firebase/app";
-import {
-  getFirestore,
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-  arrayUnion,
-} from "firebase/firestore";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBHGoIX0TS8a6Qb4KI_YKoj3SZnWqWTzGE",
-  authDomain: "ila-app-4d690.firebaseapp.com",
-  projectId: "ila-app-4d690",
-  storageBucket: "ila-app-4d690.firebasestorage.app",
-  messagingSenderId: "50766624696",
-  appId: "1:50766624696:web:909674224a610affa1414d",
-  measurementId: "G-CEZV16PP6H",
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+import { savePageData, SHEET_NAMES } from "../../lib/googleSheets";
 
 export default async function handler(req, res) {
   if (req.method === "POST") {
@@ -36,32 +15,8 @@ export default async function handler(req, res) {
     }
 
     try {
-      const pageRef = doc(db, "pages", "4SY9mIAu4jtEFcFgHPHe");
-      const pageDoc = await getDoc(pageRef);
-
-      const normalizedSections = sections.map((section) => ({
-        heading: section.heading,
-        description: section.description,
-        headingFontSize: section.headingFontSize || 24,
-        descriptionFontSize: section.descriptionFontSize || 16,
-      }));
-
-      if (action === "overwrite") {
-        await setDoc(pageRef, { displayPage, sections: normalizedSections });
-        return res
-          .status(200)
-          .json({ message: "Data overwritten successfully" });
-      } else if (action === "append") {
-        if (!pageDoc.exists()) {
-          await setDoc(pageRef, { displayPage, sections: normalizedSections });
-        } else {
-          await updateDoc(pageRef, {
-            sections: arrayUnion(...normalizedSections),
-            displayPage,
-          });
-        }
-        return res.status(200).json({ message: "Data appended successfully" });
-      }
+      await savePageData(SHEET_NAMES.PAGE1, sections, displayPage, action);
+      return res.status(200).json({ message: "Data saved successfully" });
     } catch (error) {
       console.error("Error saving data:", error);
       return res.status(500).json({ error: "Failed to save data" });

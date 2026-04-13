@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Radio from "@mui/material/Radio";
@@ -13,7 +13,7 @@ import Slider from "@mui/material/Slider"; // Import for font size slider
 import Checkbox from "@mui/material/Checkbox"; // Import Checkbox component
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 
-const FormBuilder = ({ onSave, loading }) => {
+const FormBuilder = ({ onSave, loading, initialData }) => {
   const [sections, setSections] = useState([]);
   const [input, setInput] = useState({
     heading: "",
@@ -22,7 +22,14 @@ const FormBuilder = ({ onSave, loading }) => {
     descriptionFontSize: 16,
   });
   const [action, setAction] = useState("overwrite");
-  const [displayPage, setDisplayPage] = useState(true); // State for display page checkbox
+  const [displayPage, setDisplayPage] = useState(true);
+
+  useEffect(() => {
+    if (initialData) {
+      if (Array.isArray(initialData.sections)) setSections(initialData.sections);
+      if (typeof initialData.displayPage === "boolean") setDisplayPage(initialData.displayPage);
+    }
+  }, [initialData]);
 
   const handleAddSection = () => {
     setSections([...sections, input]);
