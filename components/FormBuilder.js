@@ -27,7 +27,6 @@ const FormBuilder = ({ onSave, loading, initialData }) => {
 
   useEffect(() => {
     if (initialData) {
-      if (Array.isArray(initialData.sections)) setSections(initialData.sections);
       if (typeof initialData.displayPage === "boolean") setDisplayPage(initialData.displayPage);
     }
   }, [initialData]);
