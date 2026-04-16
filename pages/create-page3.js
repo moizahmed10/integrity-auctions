@@ -11,7 +11,7 @@ const CreatePage = () => {
     fetch("/api/get-page3")
       .then((res) => res.json())
       .then((data) => setInitialData(data))
-      .catch(() => {});
+      .catch(() => setInitialData({ displayPage: true, sections: [] }));
   }, []);
   // State for Snackbar Alert
   const [alert, setAlert] = useState({

@@ -503,8 +503,8 @@ const NotebookEditor = ({ onSave, loading, initialData }) => {
     <div
       style={{
         backgroundColor: "#f5f4f2",
+        minHeight: "100vh",
         paddingBottom: 64,
-        borderRadius: "12px",
       }}
     >
       {/* ── Top toolbar ── */}
@@ -517,10 +517,9 @@ const NotebookEditor = ({ onSave, loading, initialData }) => {
           alignItems: "center",
           gap: 16,
           position: "sticky",
-          top: 0,
+          top: 64,
           zIndex: 10,
           boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
-          borderRadius: "12px",
         }}
       >
         {/* Left: label + unsaved dot */}
