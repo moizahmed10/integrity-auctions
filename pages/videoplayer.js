@@ -29,6 +29,7 @@ const TransitionPage = () => {
         const pageData = await pageResponse.json();
 
         setCountdownTime(timeData.countdownTime);
+        if (timeData.transitionTime) setTransitionTime(timeData.transitionTime);
         setDisplayPages(
           [
             { id: "view-form", show: pageData.display1 },

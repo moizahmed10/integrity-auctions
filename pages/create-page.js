@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from "react";
-import FormBuilder from "../components/FormBuilder";
-import { useRouter } from "next/router";
+import NotebookEditor from "../components/NotebookEditor";
 import Header from "../components/Header";
 import { Snackbar, Alert, AlertTitle } from "@mui/material";
 
 const CreatePage = () => {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState(null);
 
@@ -70,7 +68,7 @@ const CreatePage = () => {
   return (
     <Header>
       <div>
-        <FormBuilder onSave={handleSave} loading={loading} initialData={initialData} />
+        <NotebookEditor onSave={handleSave} loading={loading} initialData={initialData} />
       </div>
 
       {/* Snackbar Alert for Success or Error */}
