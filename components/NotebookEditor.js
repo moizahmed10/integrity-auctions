@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import LoadingButton from "@mui/lab/LoadingButton";
-import { Switch, FormControlLabel, IconButton, Skeleton, Tooltip } from "@mui/material";
+import {
+  Switch,
+  FormControlLabel,
+  IconButton,
+  Skeleton,
+  Tooltip,
+} from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import SaveIcon from "@mui/icons-material/Save";
 import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
@@ -8,7 +14,9 @@ import AddIcon from "@mui/icons-material/Add";
 
 const BRAND = "#812d20";
 const BRAND_DARK = "#6a2419";
-const FONT_SIZES = [10, 11, 12, 13, 14, 15, 16, 18, 20, 22, 24, 28, 32, 36, 40, 48, 56, 64];
+const FONT_SIZES = [
+  10, 11, 12, 13, 14, 15, 16, 18, 20, 22, 24, 28, 32, 36, 40, 48, 56, 64,
+];
 
 // ─── Auto-resizing textarea ───────────────────────────────────────────────────
 
@@ -113,7 +121,13 @@ function FontSizeSelect({ value, onChange, label }) {
           viewBox="0 0 8 5"
           fill="none"
         >
-          <path d="M1 1L4 4L7 1" stroke="#9ca3af" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          <path
+            d="M1 1L4 4L7 1"
+            stroke="#9ca3af"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
       </div>
     </div>
@@ -153,7 +167,9 @@ function SectionBlock({ section, onChange, onDelete, index }) {
       />
 
       {/* Section content */}
-      <div style={{ flex: 1, paddingTop: 22, paddingBottom: 22, paddingRight: 4 }}>
+      <div
+        style={{ flex: 1, paddingTop: 22, paddingBottom: 22, paddingRight: 4 }}
+      >
         {/* Header row */}
         <div
           style={{
@@ -368,7 +384,9 @@ function EmptyState({ onAdd }) {
           fontFamily: "inherit",
           transition: "background 0.15s",
         }}
-        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = BRAND_DARK)}
+        onMouseEnter={(e) =>
+          (e.currentTarget.style.backgroundColor = BRAND_DARK)
+        }
         onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = BRAND)}
       >
         <AddIcon sx={{ fontSize: 16 }} />
@@ -385,12 +403,28 @@ function EditorSkeleton() {
     <>
       {[1, 2].map((i) => (
         <div key={i} style={{ display: "flex", marginBottom: 2 }}>
-          <Skeleton variant="rounded" width={3} sx={{ mr: "20px", borderRadius: 1 }} height="auto" style={{ minHeight: 130 }} />
+          <Skeleton
+            variant="rounded"
+            width={3}
+            sx={{ mr: "20px", borderRadius: 1 }}
+            height="auto"
+            style={{ minHeight: 130 }}
+          />
           <div style={{ flex: 1, paddingTop: 22, paddingBottom: 22 }}>
             <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
               <Skeleton variant="circular" width={22} height={22} />
-              <Skeleton variant="rounded" width={80} height={22} sx={{ borderRadius: 1 }} />
-              <Skeleton variant="rounded" width={80} height={22} sx={{ borderRadius: 1 }} />
+              <Skeleton
+                variant="rounded"
+                width={80}
+                height={22}
+                sx={{ borderRadius: 1 }}
+              />
+              <Skeleton
+                variant="rounded"
+                width={80}
+                height={22}
+                sx={{ borderRadius: 1 }}
+              />
             </div>
             <Skeleton variant="text" width="55%" height={28} sx={{ mb: 1 }} />
             <Skeleton variant="text" width="100%" height={16} />
@@ -414,7 +448,10 @@ const NotebookEditor = ({ onSave, loading, initialData }) => {
 
   useEffect(() => {
     if (initialData !== null) {
-      const loaded = (initialData?.sections || []).map((s, i) => ({ ...s, id: i + 1 }));
+      const loaded = (initialData?.sections || []).map((s, i) => ({
+        ...s,
+        id: i + 1,
+      }));
       setSections(loaded);
       initialRef.current = JSON.stringify(loaded);
       if (typeof initialData?.displayPage === "boolean") {
@@ -444,7 +481,7 @@ const NotebookEditor = ({ onSave, loading, initialData }) => {
 
   const handleChange = (id, field, value) => {
     setSections((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, [field]: value } : s))
+      prev.map((s) => (s.id === id ? { ...s, [field]: value } : s)),
     );
   };
 
@@ -466,8 +503,8 @@ const NotebookEditor = ({ onSave, loading, initialData }) => {
     <div
       style={{
         backgroundColor: "#f5f4f2",
-        minHeight: "100vh",
         paddingBottom: 64,
+        borderRadius: "12px",
       }}
     >
       {/* ── Top toolbar ── */}
@@ -483,6 +520,7 @@ const NotebookEditor = ({ onSave, loading, initialData }) => {
           top: 0,
           zIndex: 10,
           boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+          borderRadius: "12px",
         }}
       >
         {/* Left: label + unsaved dot */}
@@ -518,8 +556,18 @@ const NotebookEditor = ({ onSave, loading, initialData }) => {
         {/* Right: display toggle + save */}
         {isLoading ? (
           <>
-            <Skeleton variant="rounded" width={140} height={32} sx={{ borderRadius: 2 }} />
-            <Skeleton variant="rounded" width={100} height={36} sx={{ borderRadius: 2 }} />
+            <Skeleton
+              variant="rounded"
+              width={140}
+              height={32}
+              sx={{ borderRadius: 2 }}
+            />
+            <Skeleton
+              variant="rounded"
+              width={100}
+              height={36}
+              sx={{ borderRadius: 2 }}
+            />
           </>
         ) : (
           <>
@@ -538,7 +586,9 @@ const NotebookEditor = ({ onSave, loading, initialData }) => {
                 />
               }
               label={
-                <span style={{ fontSize: 13, color: "#374151", fontWeight: 500 }}>
+                <span
+                  style={{ fontSize: 13, color: "#374151", fontWeight: 500 }}
+                >
                   Display Page
                 </span>
               }
@@ -627,7 +677,8 @@ const NotebookEditor = ({ onSave, loading, initialData }) => {
               userSelect: "none",
             }}
           >
-            {sections.length} section{sections.length !== 1 ? "s" : ""} &nbsp;·&nbsp; Changes are saved to Google Sheets
+            {sections.length} section{sections.length !== 1 ? "s" : ""}{" "}
+            &nbsp;·&nbsp; Changes are saved to Google Sheets
           </p>
         )}
       </div>
