@@ -4,7 +4,7 @@ import {
   Switch,
   FormControlLabel,
   IconButton,
-  Skeleton,
+  CircularProgress,
   Tooltip,
 } from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
@@ -396,44 +396,25 @@ function EmptyState({ onAdd }) {
   );
 }
 
-// ─── Skeleton loader ──────────────────────────────────────────────────────────
+// ─── Spin loader ──────────────────────────────────────────────────────────────
 
-function EditorSkeleton() {
+function SpinLoader() {
   return (
-    <>
-      {[1, 2].map((i) => (
-        <div key={i} style={{ display: "flex", marginBottom: 2 }}>
-          <Skeleton
-            variant="rounded"
-            width={3}
-            sx={{ mr: "20px", borderRadius: 1 }}
-            height="auto"
-            style={{ minHeight: 130 }}
-          />
-          <div style={{ flex: 1, paddingTop: 22, paddingBottom: 22 }}>
-            <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
-              <Skeleton variant="circular" width={22} height={22} />
-              <Skeleton
-                variant="rounded"
-                width={80}
-                height={22}
-                sx={{ borderRadius: 1 }}
-              />
-              <Skeleton
-                variant="rounded"
-                width={80}
-                height={22}
-                sx={{ borderRadius: 1 }}
-              />
-            </div>
-            <Skeleton variant="text" width="55%" height={28} sx={{ mb: 1 }} />
-            <Skeleton variant="text" width="100%" height={16} />
-            <Skeleton variant="text" width="85%" height={16} />
-            <Skeleton variant="text" width="70%" height={16} />
-          </div>
-        </div>
-      ))}
-    </>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "64px 20px",
+        gap: 16,
+      }}
+    >
+      <CircularProgress size={40} sx={{ color: BRAND }} />
+      <span style={{ fontSize: 13, color: "#9ca3af", fontWeight: 500 }}>
+        Loading content...
+      </span>
+    </div>
   );
 }
 
@@ -492,7 +473,6 @@ const NotebookEditor = ({ onSave, loading, initialData }) => {
   const handleSave = () => {
     const clean = sections.map(({ id, ...rest }) => rest);
     onSave(clean, "overwrite", displayPage);
-    // Mark as saved
     initialRef.current = JSON.stringify(sections);
     setIsDirty(false);
   };
@@ -503,8 +483,13 @@ const NotebookEditor = ({ onSave, loading, initialData }) => {
     <div
       style={{
         backgroundColor: "#f5f4f2",
-        minHeight: "100vh",
+        minHeight: "100%",
+        paddingTop: 20,
+        paddingRight: 10,
+        paddingLeft: 10,
         paddingBottom: 64,
+        border: "5px solid #e5e7eb",
+        borderRadius: "12px",
       }}
     >
       {/* ── Top toolbar ── */}
@@ -554,20 +539,7 @@ const NotebookEditor = ({ onSave, loading, initialData }) => {
 
         {/* Right: display toggle + save */}
         {isLoading ? (
-          <>
-            <Skeleton
-              variant="rounded"
-              width={140}
-              height={32}
-              sx={{ borderRadius: 2 }}
-            />
-            <Skeleton
-              variant="rounded"
-              width={100}
-              height={36}
-              sx={{ borderRadius: 2 }}
-            />
-          </>
+          <CircularProgress size={22} sx={{ color: BRAND }} />
         ) : (
           <>
             <FormControlLabel
@@ -601,7 +573,6 @@ const NotebookEditor = ({ onSave, loading, initialData }) => {
               startIcon={<SaveIcon sx={{ fontSize: 16 }} />}
               sx={{
                 backgroundColor: BRAND,
-                "&:hover": { backgroundColor: BRAND_DARK },
                 textTransform: "none",
                 fontWeight: 600,
                 fontSize: 13,
@@ -644,7 +615,7 @@ const NotebookEditor = ({ onSave, loading, initialData }) => {
           {/* Paper body */}
           <div style={{ padding: "28px 40px 32px" }}>
             {isLoading ? (
-              <EditorSkeleton />
+              <SpinLoader />
             ) : sections.length === 0 ? (
               <EmptyState onAdd={handleAdd} />
             ) : (
