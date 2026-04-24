@@ -10,14 +10,21 @@ const PageRenderer = ({ sections }) => (
   >
     {sections.map((section, index) => (
       <div key={index}>
-        <h1 style={{ fontSize: section.headingFontSize || 24, color: "black" }}>
+        <h1
+          style={{
+            fontSize: section.headingFontSize || 24,
+            color: "black",
+            marginTop: section.topSpacing ?? 0,
+            marginBottom: section.headingGap ?? 10,
+          }}
+        >
           {section.heading}
         </h1>
-        {console.log("sections", section)}
         <p
           style={{
             fontSize: section.descriptionFontSize || 16,
             color: "black",
+            marginBottom: section.bottomSpacing ?? 0,
           }}
         >
           {section.description}

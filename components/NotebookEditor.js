@@ -17,6 +17,7 @@ const BRAND_DARK = "#6a2419";
 const FONT_SIZES = [
   10, 11, 12, 13, 14, 15, 16, 18, 20, 22, 24, 28, 32, 36, 40, 48, 56, 64,
 ];
+const SPACING_SIZES = [0, 4, 8, 12, 16, 20, 24, 32, 40, 48, 56, 64];
 
 // ─── Auto-resizing textarea ───────────────────────────────────────────────────
 
@@ -134,6 +135,83 @@ function FontSizeSelect({ value, onChange, label }) {
   );
 }
 
+// ─── Spacing picker ───────────────────────────────────────────────────────────
+
+function SpacingSelect({ value, onChange, label }) {
+  const [focused, setFocused] = useState(false);
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+      <span
+        style={{
+          fontSize: 10,
+          fontWeight: 700,
+          letterSpacing: "0.06em",
+          textTransform: "uppercase",
+          color: "#9ca3af",
+          userSelect: "none",
+        }}
+      >
+        {label}
+      </span>
+      <div
+        style={{
+          position: "relative",
+          display: "inline-flex",
+          alignItems: "center",
+        }}
+      >
+        <select
+          value={value}
+          onChange={(e) => onChange(Number(e.target.value))}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          style={{
+            appearance: "none",
+            WebkitAppearance: "none",
+            fontSize: 11,
+            fontWeight: 600,
+            padding: "3px 22px 3px 8px",
+            border: `1.5px solid ${focused ? BRAND : "#e5e7eb"}`,
+            borderRadius: 6,
+            background: focused ? "#fff8f7" : "#f9fafb",
+            color: "#374151",
+            cursor: "pointer",
+            minWidth: 62,
+            outline: "none",
+            transition: "border-color 0.15s, background 0.15s",
+          }}
+        >
+          {SPACING_SIZES.map((s) => (
+            <option key={s} value={s}>
+              {s}px
+            </option>
+          ))}
+        </select>
+        <svg
+          style={{
+            position: "absolute",
+            right: 6,
+            pointerEvents: "none",
+            color: "#9ca3af",
+          }}
+          width="8"
+          height="5"
+          viewBox="0 0 8 5"
+          fill="none"
+        >
+          <path
+            d="M1 1L4 4L7 1"
+            stroke="#9ca3af"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </div>
+    </div>
+  );
+}
+
 // ─── Section block ────────────────────────────────────────────────────────────
 
 function SectionBlock({ section, onChange, onDelete, index }) {
@@ -200,7 +278,7 @@ function SectionBlock({ section, onChange, onDelete, index }) {
             {index + 1}
           </span>
 
-          {/* Font size selects */}
+          {/* Font size + spacing selects */}
           <div
             style={{
               display: "flex",
@@ -220,6 +298,24 @@ function SectionBlock({ section, onChange, onDelete, index }) {
               label="Body"
               value={section.descriptionFontSize}
               onChange={(v) => onChange(section.id, "descriptionFontSize", v)}
+            />
+            <div style={{ width: 1, height: 14, background: "#e5e7eb" }} />
+            <SpacingSelect
+              label="Top Space"
+              value={section.topSpacing ?? 0}
+              onChange={(v) => onChange(section.id, "topSpacing", v)}
+            />
+            <div style={{ width: 1, height: 14, background: "#e5e7eb" }} />
+            <SpacingSelect
+              label="Bot Space"
+              value={section.bottomSpacing ?? 0}
+              onChange={(v) => onChange(section.id, "bottomSpacing", v)}
+            />
+            <div style={{ width: 1, height: 14, background: "#e5e7eb" }} />
+            <SpacingSelect
+              label="Gap"
+              value={section.headingGap ?? 10}
+              onChange={(v) => onChange(section.id, "headingGap", v)}
             />
           </div>
 
@@ -262,7 +358,8 @@ function SectionBlock({ section, onChange, onDelete, index }) {
             fontWeight: 700,
             color: "#111827",
             fontFamily: "inherit",
-            marginBottom: 10,
+            marginTop: section.topSpacing ?? 0,
+            marginBottom: section.headingGap ?? 10,
             padding: 0,
             display: "block",
             boxSizing: "border-box",
@@ -271,12 +368,14 @@ function SectionBlock({ section, onChange, onDelete, index }) {
         />
 
         {/* Body field */}
-        <AutoTextarea
-          value={section.description}
-          onChange={(e) => onChange(section.id, "description", e.target.value)}
-          placeholder="Start writing..."
-          fontSize={section.descriptionFontSize}
-        />
+        <div style={{ marginBottom: section.bottomSpacing ?? 0 }}>
+          <AutoTextarea
+            value={section.description}
+            onChange={(e) => onChange(section.id, "description", e.target.value)}
+            placeholder="Start writing..."
+            fontSize={section.descriptionFontSize}
+          />
+        </div>
       </div>
     </div>
   );
@@ -456,6 +555,9 @@ const NotebookEditor = ({ onSave, loading, initialData }) => {
         description: "",
         headingFontSize: 24,
         descriptionFontSize: 16,
+        topSpacing: 0,
+        bottomSpacing: 0,
+        headingGap: 10,
       },
     ]);
   };
