@@ -15,9 +15,14 @@ import AddIcon from "@mui/icons-material/Add";
 const BRAND = "#812d20";
 const BRAND_DARK = "#6a2419";
 const FONT_SIZES = [
-  10, 11, 12, 13, 14, 15, 16, 18, 20, 22, 24, 28, 32, 36, 40, 48, 56, 64,
+  10, 11, 12, 13, 14, 15, 16, 18, 20, 22, 24, 28, 32, 36, 40, 48, 56, 64, 72,
+  80, 96, 112, 128, 144, 160, 192, 224, 256, 288, 320, 384, 448, 512, 576, 640,
+  768, 896, 1024,
 ];
-const SPACING_SIZES = [0, 4, 8, 12, 16, 20, 24, 32, 40, 48, 56, 64];
+const SPACING_SIZES = [
+  0, 4, 8, 12, 16, 20, 24, 32, 40, 48, 56, 64, 72, 80, 96, 128, 160, 192, 256,
+  320, 384, 512, 640, 768, 1024,
+];
 
 // ─── Auto-resizing textarea ───────────────────────────────────────────────────
 
@@ -371,7 +376,9 @@ function SectionBlock({ section, onChange, onDelete, index }) {
         <div style={{ marginBottom: section.bottomSpacing ?? 0 }}>
           <AutoTextarea
             value={section.description}
-            onChange={(e) => onChange(section.id, "description", e.target.value)}
+            onChange={(e) =>
+              onChange(section.id, "description", e.target.value)
+            }
             placeholder="Start writing..."
             fontSize={section.descriptionFontSize}
           />
