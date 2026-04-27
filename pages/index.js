@@ -11,6 +11,7 @@ const extractVideoId = (url) => {
 
 const VideoPlayer = () => {
   const [videoId, setVideoId] = useState(null);
+  const [configLoaded, setConfigLoaded] = useState(false);
   const playerRef = useRef(null);
   const currentLoopRef = useRef(1);
   const router = useRouter();
@@ -19,12 +20,20 @@ const VideoPlayer = () => {
     fetch("/api/fetch-time")
       .then((r) => r.json())
       .then((data) => {
+        if (data.skipVideo) {
+          router.push("/videoplayer");
+          return;
+        }
         const id = extractVideoId(data.videoUrl);
         const loops = parseInt(data.loopCount, 10) || 1;
         setVideoId(id);
         currentLoopRef.current = loops;
+        setConfigLoaded(true);
       })
-      .catch((err) => console.error("Error fetching config:", err));
+      .catch((err) => {
+        console.error("Error fetching config:", err);
+        setConfigLoaded(true);
+      });
   }, []);
 
   // Resume playback when tab regains focus
@@ -73,6 +82,10 @@ const VideoPlayer = () => {
       playsinline: 1,
     },
   };
+
+  if (!configLoaded) {
+    return <div style={{ background: "black", height: "100vh", width: "100vw" }} />;
+  }
 
   return (
     <div style={{ background: "black", height: "100vh", width: "100vw" }}>

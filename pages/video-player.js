@@ -19,6 +19,10 @@ const VideoPlayer = () => {
     fetch("/api/fetch-time")
       .then((r) => r.json())
       .then((data) => {
+        if (data.skipVideo) {
+          router.push("/");
+          return;
+        }
         const id = extractVideoId(data.videoUrl);
         const loops = parseInt(data.loopCount, 10) || 1;
         setVideoId(id);

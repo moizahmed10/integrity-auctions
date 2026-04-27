@@ -6,7 +6,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { Button, TextField, Snackbar, Alert, AlertTitle, Skeleton } from "@mui/material";
+import { Button, TextField, Snackbar, Alert, AlertTitle, Skeleton, FormControlLabel, Switch } from "@mui/material";
 import LoadingButton from "@mui/lab/LoadingButton";
 
 const SetTime = () => {
@@ -14,6 +14,7 @@ const SetTime = () => {
   const [transitionTime, setTransitionTime] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
   const [loopCount, setLoopCount] = useState("");
+  const [skipVideo, setSkipVideo] = useState(false);
   const [dataLoaded, setDataLoaded] = useState(false);
 
   useEffect(() => {
@@ -24,6 +25,7 @@ const SetTime = () => {
         if (data.transitionTime != null) setTransitionTime(String(data.transitionTime));
         if (data.videoUrl) setVideoUrl(data.videoUrl);
         if (data.loopCount != null) setLoopCount(String(data.loopCount));
+        if (data.skipVideo != null) setSkipVideo(Boolean(data.skipVideo));
         setDataLoaded(true);
       })
       .catch(() => setDataLoaded(true));
@@ -101,18 +103,19 @@ const SetTime = () => {
       formValid = false;
     }
 
-    // Validate the video URL
-    if (!videoUrl || !videoUrl.startsWith("http")) {
-      setVideoUrlErrorMessage("Please provide a valid video URL.");
-      setError((prevError) => ({ ...prevError, videoUrl: true }));
-      formValid = false;
-    }
+    // Validate the video URL and loop count only when video is not skipped
+    if (!skipVideo) {
+      if (!videoUrl || !videoUrl.startsWith("http")) {
+        setVideoUrlErrorMessage("Please provide a valid video URL.");
+        setError((prevError) => ({ ...prevError, videoUrl: true }));
+        formValid = false;
+      }
 
-    // Validate the loop count
-    if (loopCount === "" || loopCount <= 0) {
-      setLoopCountErrorMessage("Loop count must be a positive number.");
-      setError((prevError) => ({ ...prevError, loopCount: true }));
-      formValid = false;
+      if (loopCount === "" || loopCount <= 0) {
+        setLoopCountErrorMessage("Loop count must be a positive number.");
+        setError((prevError) => ({ ...prevError, loopCount: true }));
+        formValid = false;
+      }
     }
 
     if (!formValid) return;
@@ -128,6 +131,7 @@ const SetTime = () => {
           transitionTime,
           videoUrl,
           loopCount,
+          skipVideo,
         }),
       });
 
@@ -215,6 +219,18 @@ const SetTime = () => {
                   }
                 />
 
+                <FormControlLabel
+                  sx={{ margin: "0px 0px 10px 0px" }}
+                  control={
+                    <Switch
+                      checked={skipVideo}
+                      onChange={(e) => setSkipVideo(e.target.checked)}
+                      color="primary"
+                    />
+                  }
+                  label="Skip YouTube Video"
+                />
+
                 <TextField
                   sx={{ margin: "25px 0px" }}
                   label="Video URL"
@@ -223,6 +239,7 @@ const SetTime = () => {
                   onChange={(e) => setVideoUrl(e.target.value)}
                   error={error.videoUrl}
                   helperText={videoUrlErrorMessage}
+                  disabled={skipVideo}
                 />
 
                 <TextField
@@ -234,6 +251,7 @@ const SetTime = () => {
                   onChange={(e) => setLoopCount(e.target.value)}
                   error={error.loopCount}
                   helperText={loopCountErrorMessage}
+                  disabled={skipVideo}
                 />
 
                 <LoadingButton
@@ -241,8 +259,7 @@ const SetTime = () => {
                   variant="contained"
                   disabled={
                     transitionTime.length === 0 ||
-                    videoUrl.length === 0 ||
-                    loopCount.length === 0
+                    (!skipVideo && (videoUrl.length === 0 || loopCount.length === 0))
                   }
                   loading={loading}
                 >

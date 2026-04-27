@@ -2,17 +2,15 @@ import { saveConfigData } from "../../lib/googleSheets";
 
 export default async function handler(req, res) {
   if (req.method === "POST") {
-    const { countdownTime, transitionTime, videoUrl, loopCount } = req.body;
+    const { countdownTime, transitionTime, videoUrl, loopCount, skipVideo } = req.body;
 
-    if (
-      !countdownTime ||
-      isNaN(transitionTime) ||
-      !videoUrl ||
-      typeof videoUrl !== "string" ||
-      !videoUrl.startsWith("http") ||
-      isNaN(loopCount) ||
-      loopCount <= 0
-    ) {
+    if (!countdownTime || isNaN(transitionTime)) {
+      return res.status(400).json({
+        message: "Invalid data. Please provide valid inputs for all fields.",
+      });
+    }
+
+    if (!skipVideo && (!videoUrl || typeof videoUrl !== "string" || !videoUrl.startsWith("http") || isNaN(loopCount) || loopCount <= 0)) {
       return res.status(400).json({
         message: "Invalid data. Please provide valid inputs for all fields.",
       });
@@ -22,8 +20,9 @@ export default async function handler(req, res) {
       await saveConfigData({
         countdownTime,
         transitionTime: Number(transitionTime),
-        videoUrl,
-        loopCount: Number(loopCount),
+        videoUrl: videoUrl || "",
+        loopCount: Number(loopCount) || 1,
+        skipVideo: Boolean(skipVideo),
       });
       return res.status(200).json({ message: "Settings saved successfully!" });
     } catch (error) {
